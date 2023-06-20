@@ -39,7 +39,7 @@ model Account {
     @@unique([provider, providerAccountId])
 }
 
-model Session {
+model Session {tsxon
     id           String   @id @default(cuid())
     sessionToken String   @unique
     userId       String
