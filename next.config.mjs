@@ -1,5 +1,7 @@
 // @ts-check
 
+import { env } from "./src/env.mjs";
+
 /**
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
  * This is especially useful for Docker builds.
@@ -10,7 +12,7 @@
 const config = {
   reactStrictMode: true,
   images: {
-    domains: ["oaidalleapiprodscus.blob.core.windows.net"]
+    domains: ["oaidalleapiprodscus.blob.core.windows.net", `${env.S3_BUCKET_NAME}.s3.us-west-2.amazonaws.com`],
   },
 
   /**

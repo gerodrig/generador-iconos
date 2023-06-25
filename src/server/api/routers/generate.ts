@@ -76,7 +76,7 @@ export const generateRouter = createTRPCRouter({
 
       //? save the images to the S3 bucket
       await s3.putObject({
-        Bucket: 'icon-generator-gics',
+        Bucket: env.S3_BUCKET_NAME,
         Body: Buffer.from(base64EncodedImage!, 'base64'),
         Key: icon.id, // generate a unique key
         ContentEncoding: 'base64',
@@ -84,7 +84,7 @@ export const generateRouter = createTRPCRouter({
       }).promise();
 
       return {
-        imageUrl: base64EncodedImage,
+        imageUrl: `https://${env.S3_BUCKET_NAME}.s3.us-west-2.amazonaws.com/${icon.id}`
       };
     }),
 });

@@ -75,13 +75,13 @@ const GeneratePage: NextPage = () => {
         </form>
         {
           imageUrl &&
-          <img 
-            src={`data:image/png;base64,${imageUrl}`}
-            alt="Generated Icon"
-            width={100}
-            height={100}
-          />
-        // <Image className="my-2" src={imageUrl} alt="Generated Icon" width={100} height={100} />
+          // <img 
+          //   src={`data:image/png;base64,${imageUrl}`}
+          //   alt="Generated Icon"
+          //   width={100}
+          //   height={100}
+          // />
+        <Image className="my-2" src={imageUrl} alt="Generated Icon" width={100} height={100} />
         }
       </main>
     </>
