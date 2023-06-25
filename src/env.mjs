@@ -23,6 +23,10 @@ const server = z.object({
   DISCORD_CLIENT_SECRET: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
+  DALLE_API_KEY: z.string(),
+  MOCK_DALLE: z.string(),
+  S3_ACCESS_KEY: z.string(),
+  S3_SECRET_KEY: z.string(),
 });
 
 /**
@@ -48,6 +52,10 @@ const processEnv = {
   DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  DALLE_API_KEY: process.env.DALLE_API_KEY,
+  MOCK_DALLE: process.env.MOCK_DALLE,
+  S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
+  S3_SECRET_KEY: process.env.S3_SECRET_KEY,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 

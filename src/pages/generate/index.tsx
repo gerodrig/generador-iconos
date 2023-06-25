@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { Metadata, NextPage } from "next";
 import Head from "next/head";
 import { signIn } from "next-auth/react";
@@ -5,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { Input, FormGroup, Button } from "@/components/UI/";
 import { useState } from "react";
 import { api } from "@/utils/api";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Generate",
@@ -17,6 +19,8 @@ const GeneratePage: NextPage = () => {
     prompt: "",
   });
 
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
   const updateForm =
     (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({
@@ -27,7 +31,11 @@ const GeneratePage: NextPage = () => {
 
   const generateIcon = api.generate.generateIcon.useMutation({
     onSuccess: (data) => {
-      console.log("mutation finished", data);
+      // console.log("mutation finished", data.imageUrl);
+      
+      if (!data.imageUrl) return;
+
+      setImageUrl(data.imageUrl);
     },
   });
 
@@ -35,10 +43,12 @@ const GeneratePage: NextPage = () => {
     e.preventDefault();
     console.log(form);
 
-    // TODO: Submit the form data to the backend
+    
     generateIcon.mutate({
       prompt: form.prompt,
     });
+
+    setForm({ prompt: "" });
   };
 
   return (
@@ -63,6 +73,16 @@ const GeneratePage: NextPage = () => {
           </FormGroup>
           <Button />
         </form>
+        {
+          imageUrl &&
+          <img 
+            src={`data:image/png;base64,${imageUrl}`}
+            alt="Generated Icon"
+            width={100}
+            height={100}
+          />
+        // <Image className="my-2" src={imageUrl} alt="Generated Icon" width={100} height={100} />
+        }
       </main>
     </>
   );
