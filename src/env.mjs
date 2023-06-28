@@ -28,6 +28,10 @@ const server = z.object({
   S3_BUCKET_NAME: z.string(),
   S3_ACCESS_KEY: z.string(),
   S3_SECRET_KEY: z.string(),
+  STRIPE_SECRET_KEY: z.string(),
+  HOST_NAME: z.string(),
+  STRIPE_PRICE_ID: z.string(),
+  STRIPE_WEBHOOK_SECRET: z.string(),
 });
 
 /**
@@ -36,6 +40,7 @@ const server = z.object({
  */
 const client = z.object({
   // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
+  NEXT_PUBLIC_STRIPE_KEY: z.string(),
 });
 
 /**
@@ -58,6 +63,11 @@ const processEnv = {
   S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
   S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
   S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+  NEXT_PUBLIC_STRIPE_KEY: process.env.NEXT_PUBLIC_STRIPE_KEY,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  STRIPE_PRICE_ID: process.env.STRIPE_PRICE_ID,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  HOST_NAME: process.env.HOST_NAME,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 
