@@ -49,7 +49,7 @@ const GeneratePage: NextPage = () => {
 
     generateIcon.mutate(form);
 
-    setForm((prev) => ({ ...prev, prompt: ""}));
+    setForm((prev) => ({ ...prev, prompt: "" }));
   };
 
   return (
@@ -77,9 +77,13 @@ const GeneratePage: NextPage = () => {
               <Input type="radio" name="color" />
               Blue
             </label> */}
-            <GithubPicker triangle="hide"onSwatchHover={(color) => {
-              setForm((prev) => ({ ...prev, color: color.hex }));
-            }}/>
+            <GithubPicker
+              triangle="hide"
+              onSwatchHover={(color) => {
+                setForm((prev) => ({ ...prev, color: color.hex }));
+              }}
+              styles={{default: { card: { background: "gray" } }}}
+            />
           </FormGroup>
           <Button isLoading={generateIcon.isLoading}>Generar Iconos</Button>
         </form>

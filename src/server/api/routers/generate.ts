@@ -11,14 +11,14 @@ import {
 import { Configuration, OpenAIApi } from "openai";
 import { env } from "@/env.mjs";
 import AWS from "aws-sdk";
-import { b64Image } from '@/data/b64Image';
+import { b64Image } from "@/data/b64Image";
 
 const s3 = new AWS.S3({
   credentials: {
     accessKeyId: env.S3_ACCESS_KEY,
     secretAccessKey: env.S3_SECRET_KEY,
   },
-  region: 'us-east-1',
+  region: "us-east-1",
 });
 
 const configuration = new Configuration({
@@ -64,7 +64,7 @@ export const generateRouter = createTRPCRouter({
         });
       }
 
-      const finalPrompt = `A modern icon in ${input.color} of a ${input.prompt}`
+      const finalPrompt = `A modern icon in ${input.color} of a ${input.prompt}`;
 
       //? submit prompt to DALL-E and get back icon
       const base64EncodedImage = await generateIcon(finalPrompt);
@@ -74,20 +74,28 @@ export const generateRouter = createTRPCRouter({
         data: {
           prompt: input.prompt,
           userId: ctx.session.user.id,
-         },
+        },
       });
 
       //? save the images to the S3 bucket
-      await s3.putObject({
-        Bucket: env.S3_BUCKET_NAME,
-        Body: Buffer.from(base64EncodedImage!, 'base64'),
-        Key: icon.id, // generate a unique key
-        ContentEncoding: 'base64',
-        ContentType: 'image/png',
-      }).promise();
+      if (env.MOCK_DALLE === "true") {
+        return {
+          imageUrl: '/banner.png'
+        }
+      } else {
+        await s3
+          .putObject({
+            Bucket: env.S3_BUCKET_NAME,
+            Body: Buffer.from(base64EncodedImage!, "base64"),
+            Key: icon.id, // generate a unique key
+            ContentEncoding: "base64",
+            ContentType: "image/png",
+          })
+          .promise();
 
-      return {
-        imageUrl: `https://${env.S3_BUCKET_NAME}.s3.us-west-2.amazonaws.com/${icon.id}`
-      };
+        return {
+          imageUrl: `https://${env.S3_BUCKET_NAME}.s3.us-west-2.amazonaws.com/${icon.id}`,
+        };
+      }
     }),
 });
