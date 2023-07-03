@@ -1,17 +1,22 @@
-import clsx from 'clsx';
+import clsx from "clsx";
+import { Spinner } from "./Spinner";
 
 interface Props {
-    children?: React.ReactNode;
-    onClick?: () => (void | Promise<void>);
-    variant?: 'primary' | 'secondary';
+  variant?: "primary" | "secondary";
+  isLoading?: boolean;
 }
 
-export const Button = ({variant = 'primary', children,  onClick}: Props ) => {
-
-  const color = variant === 'primary' ? 'bg-blue-400 hover:bg-blue-500' : 'bg-gray-400 hover:bg-gray-500';
+export const Button = (
+  {variant, isLoading = false, ...props}: React.ComponentPropsWithoutRef<"button"> & Props
+) => {
+  const color =
+    variant === "primary" || !variant
+      ? "bg-blue-400 hover:bg-blue-500 disabled:bg-gray-600"
+      : "bg-gray-400 hover:bg-gray-500 disabled:bg-black";
   return (
-    <button className={clsx("rounded px-4 py-2", color)} onClick={onClick}>
-    { children }
-  </button>
-  )
-}
+    <button {...props} disabled={isLoading} className={clsx("rounded px-4 py-2 flex gap-2 items-center justify-center", color)}>
+      {isLoading && <Spinner />}
+      {props.children}
+    </button>
+  );
+};

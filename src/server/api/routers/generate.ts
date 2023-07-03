@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 import {
   createTRPCRouter,
-  publicProcedure,
+  // publicProcedure,
   //   protectedProcedure,
 } from "@/server/api/trpc";
 
@@ -48,6 +48,7 @@ export const generateRouter = createTRPCRouter({
     .input(
       z.object({
         prompt: z.string(),
+        color: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -63,8 +64,10 @@ export const generateRouter = createTRPCRouter({
         });
       }
 
+      const finalPrompt = `A modern icon in ${input.color} of a ${input.prompt}`
+
       //? submit prompt to DALL-E and get back icon
-      const base64EncodedImage = await generateIcon(input.prompt);
+      const base64EncodedImage = await generateIcon(finalPrompt);
 
       //? save icon to database
       const icon = await ctx.prisma.icon.create({
