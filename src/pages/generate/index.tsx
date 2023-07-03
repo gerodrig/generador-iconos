@@ -3,12 +3,10 @@ import { useState } from "react";
 
 import type { Metadata, NextPage } from "next";
 import Head from "next/head";
-import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 
 import { Input, FormGroup, Button } from "@/components/";
 import { api } from "@/utils/api";
-import { useBuyCredits } from "@/hooks/useBuyCredits";
 
 export const metadata: Metadata = {
   title: "Generate",
@@ -17,7 +15,6 @@ export const metadata: Metadata = {
 };
 
 const GeneratePage: NextPage = () => {
-  const { buyCredits } = useBuyCredits();
 
   const [form, setForm] = useState({
     prompt: "",
@@ -57,10 +54,6 @@ const GeneratePage: NextPage = () => {
     setForm({ prompt: "" });
   };
 
-  const session = useSession();
-
-  const isLoggedIn = !!session.data;
-
   return (
     <>
       <Head>
@@ -69,31 +62,7 @@ const GeneratePage: NextPage = () => {
       </Head>
 
       <main className="flex min-h-screen flex-col items-center justify-center">
-        {!isLoggedIn && (
-          <Button
-            onClick={() => {
-              signIn().catch(console.error);
-            }}
-          >
-            Sign In
-          </Button>
-        )}
-        {isLoggedIn && (
-          <Button
-            onClick={() => {
-              signOut().catch(console.error);
-            }}
-          >
-            Logout
-          </Button>
-        )}
-        <Button
-          onClick={() => {
-            buyCredits().catch(console.error);
-          }}
-        >
-          Buy Credits
-        </Button>
+
         <form className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
           <FormGroup>
             <label>Prompt</label>
