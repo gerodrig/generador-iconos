@@ -50,6 +50,7 @@ export const generateRouter = createTRPCRouter({
         prompt: z.string(),
         color: z.string(),
         shape: z.string(),
+        style: z.string(),
         numberOfIcons: z.number().min(1).max(10),
       })
     )
@@ -66,7 +67,7 @@ export const generateRouter = createTRPCRouter({
         });
       }
 
-      const finalPrompt = `A modern ${input.shape} icon in ${input.color} of a ${input.prompt} high quality, trending on all social media platforms unreal engine quality`;
+      const finalPrompt = `A modern ${input.shape} icon in ${input.color} of a ${input.prompt} ${input.style} high quality trending on all social media platforms unreal engine quality`;
 
       //? submit prompt to DALL-E and get back icon
       const base64EncodedImages = await generateIcon(finalPrompt, input.numberOfIcons);

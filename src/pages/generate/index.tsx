@@ -17,17 +17,20 @@ export const metadata: Metadata = {
 };
 
 const shapes = ["cuadrado", "circular", "redondo"];
+const styles = ["renderizado 3D", "renderizado 2D", "pixelado", "ilustrado a lápiz"];
 
 const GeneratePage: NextPage = () => {
   const [form, setForm] = useState({
     prompt: "",
     color: "#004dcf",
     shape: "",
+    style: "",
     numberOfIcons: 1,
   });
 
   //get credit balance
   const [imagesUrl, setImagesUrl] = useState<{ imageUrl: string }[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const updateForm =
     (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,11 +44,14 @@ const GeneratePage: NextPage = () => {
     onSuccess: (data) => {
       setImagesUrl(data);
     },
+    onError: (error) => {
+      setError(error.message);
+    }
   });
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(form);
+    setError(null);
 
     generateIcon.mutate({
       ...form,
@@ -102,7 +108,7 @@ const GeneratePage: NextPage = () => {
                   type="radio"
                   name="shape"
                   checked={form.shape === shape}
-                  onChange={updateForm("shape")}
+                  onChange={() => setForm((prev) => ({ ...prev, shape }))}
                   required
                 />
                 {shape}
@@ -110,8 +116,24 @@ const GeneratePage: NextPage = () => {
             ))}
           </FormGroup>
 
+          <h2 className="text-2xl">4. Selecciona el estilo de tu icono</h2>
+          <FormGroup className="mb-12">
+            {styles.map((style) => (
+              <label key={style} className="flex gap-2 text-xl">
+                <Input
+                  type="radio"
+                  name="style"
+                  checked={form.style === style}
+                  onChange={() => setForm((prev) => ({ ...prev, style }))}
+                  required
+                />
+                {style}
+              </label>
+            ))}
+          </FormGroup>
+
           <h2 className="text-2xl">
-            4. Selecciona el numero de iconos que deseas generar (1 credito
+            5. Selecciona el numero de iconos que deseas generar (1 credito
             equivale a 1 icono)
           </h2>
           <FormGroup className="mb-12">
@@ -125,6 +147,8 @@ const GeneratePage: NextPage = () => {
               value={form.numberOfIcons}
             />
           </FormGroup>
+
+          {error && <div className="bg-red-500 text-white rounded p-4 text-xl">{error}</div>}
 
           <Button isLoading={generateIcon.isLoading}>Generar Iconos</Button>
         </form>
