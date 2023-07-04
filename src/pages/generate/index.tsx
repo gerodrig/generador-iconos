@@ -16,14 +16,18 @@ export const metadata: Metadata = {
   keywords: "Generate",
 };
 
+const shapes = ["cuadrado", "circular", "redondo"];
+
 const GeneratePage: NextPage = () => {
   const [form, setForm] = useState({
     prompt: "",
-    color: "",
+    color: "#004dcf",
+    shape: "",
+    numberOfIcons: 1,
   });
 
   //get credit balance
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imagesUrl, setImagesUrl] = useState<{ imageUrl: string }[]>([]);
 
   const updateForm =
     (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,11 +39,7 @@ const GeneratePage: NextPage = () => {
 
   const generateIcon = api.generate.generateIcon.useMutation({
     onSuccess: (data) => {
-      // console.log("mutation finished", data.imageUrl);
-
-      if (!data.imageUrl) return;
-
-      setImageUrl(data.imageUrl);
+      setImagesUrl(data);
     },
   });
 
@@ -47,7 +47,10 @@ const GeneratePage: NextPage = () => {
     e.preventDefault();
     console.log(form);
 
-    generateIcon.mutate(form);
+    generateIcon.mutate({
+      ...form,
+      numberOfIcons: Number(form.numberOfIcons),
+    });
 
     setForm((prev) => ({ ...prev, prompt: "" }));
   };
@@ -64,41 +67,82 @@ const GeneratePage: NextPage = () => {
         <p className="mb-12">Completa la forma para generar tus iconos</p>
 
         <form className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
-          <h2 className="text-xl">
+          <h2 className="text-2xl">
             1. Describe como quieres que se vea tu icono
           </h2>
           <FormGroup className="mb-12">
             <label>Prompt</label>
-            <Input onChange={updateForm("prompt")} value={form.prompt} />
+            <Input
+              required
+              onChange={updateForm("prompt")}
+              value={form.prompt}
+            />
           </FormGroup>
-          <h2 className="text-xl">2. Selecciona el color de tu icono</h2>
-          <FormGroup>
+          <h2 className="text-2xl">2. Selecciona el color de tu icono</h2>
+          <FormGroup className="mb-12">
             {/* <label className="flex gap-2 text-2xl">
               <Input type="radio" name="color" />
               Blue
             </label> */}
             <GithubPicker
               triangle="hide"
+              color={form.color}
               onSwatchHover={(color) => {
                 setForm((prev) => ({ ...prev, color: color.hex }));
               }}
-              styles={{default: { card: { background: "gray" } }}}
+              styles={{ default: { card: { background: "gray" } } }}
             />
           </FormGroup>
+
+          <h2 className="text-2xl">3. Selecciona la forma de tu icono</h2>
+          <FormGroup className="mb-12">
+            {shapes.map((shape) => (
+              <label key={shape} className="flex gap-2 text-xl">
+                <Input
+                  type="radio"
+                  name="shape"
+                  checked={form.shape === shape}
+                  onChange={updateForm("shape")}
+                  required
+                />
+                {shape}
+              </label>
+            ))}
+          </FormGroup>
+
+          <h2 className="text-2xl">
+            4. Selecciona el numero de iconos que deseas generar (1 credito
+            equivale a 1 icono)
+          </h2>
+          <FormGroup className="mb-12">
+            <label>Numero de Iconos</label>
+            <Input
+              inputMode="numeric"
+              type="number"
+              pattern="[1-9]|10"
+              onChange={updateForm("numberOfIcons")}
+              required
+              value={form.numberOfIcons}
+            />
+          </FormGroup>
+
           <Button isLoading={generateIcon.isLoading}>Generar Iconos</Button>
         </form>
 
-        {imageUrl && (
+        {imagesUrl.length > 0 && (
           <>
             <h2 className="text-xl">Tus Iconos</h2>
             <section className="grid grid-cols-4 gap-4">
-              <Image
-                className="my-2"
-                src={imageUrl}
-                alt="Generated Icon"
-                width={100}
-                height={100}
-              />
+              {imagesUrl.map(({ imageUrl }, index) => (
+                <Image
+                  key={index}
+                  className="my-2"
+                  src={imageUrl}
+                  alt="Generated Icon"
+                  width={100}
+                  height={100}
+                />
+              ))}
             </section>
           </>
         )}

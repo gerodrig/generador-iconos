@@ -27,10 +27,10 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-async function generateIcon(prompt: string): Promise<string | undefined> {
+async function generateIcon(prompt: string, numberOfIcons = 1) {
   if (env.MOCK_DALLE === "true") {
     // return "https://oaidalleapiprodscus.blob.core.windows.net/private/org-Df7F94rll8MbPRuWXAE301k7/user-xxTUWi2RusPsWWOe558eaMZT/img-ivsu2OADfyWFButv9vjbdNgE.png?st=2023-06-25T04%3A42%3A45Z&se=2023-06-25T06%3A42%3A45Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-06-25T01%3A54%3A56Z&ske=2023-06-26T01%3A54%3A56Z&sks=b&skv=2021-08-06&sig=Ay%2BaA8pIpnMnCoQ3EG1FCi6Psp312Z5J6EOOB2gM9tg%3D";
-    return b64Image;
+    return new Array<string>(numberOfIcons).fill(b64Image)
   } else {
     const response = await openai.createImage({
       prompt: prompt,
@@ -39,7 +39,7 @@ async function generateIcon(prompt: string): Promise<string | undefined> {
       response_format: "b64_json",
     });
 
-    return response.data.data[0]?.b64_json;
+    return response.data.data.map((result) => result.b64_json || '');
   }
 }
 
@@ -49,6 +49,8 @@ export const generateRouter = createTRPCRouter({
       z.object({
         prompt: z.string(),
         color: z.string(),
+        shape: z.string(),
+        numberOfIcons: z.number().min(1).max(10),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -64,11 +66,21 @@ export const generateRouter = createTRPCRouter({
         });
       }
 
-      const finalPrompt = `A modern icon in ${input.color} of a ${input.prompt}`;
+      const finalPrompt = `A modern ${input.shape} icon in ${input.color} of a ${input.prompt} high quality, trending on all social media platforms unreal engine quality`;
 
       //? submit prompt to DALL-E and get back icon
-      const base64EncodedImage = await generateIcon(finalPrompt);
+      const base64EncodedImages = await generateIcon(finalPrompt, input.numberOfIcons);
 
+      
+      //? save the images to the S3 bucket
+      if (env.MOCK_DALLE === "true") {
+        return Array.from({ length: input.numberOfIcons }, () => ({
+          imageUrl: '/banner.png',
+        }));
+      } else {
+
+      const createIcons = await Promise.all(
+          base64EncodedImages.map(async (image) => {
       //? save icon to database
       const icon = await ctx.prisma.icon.create({
         data: {
@@ -77,25 +89,22 @@ export const generateRouter = createTRPCRouter({
         },
       });
 
-      //? save the images to the S3 bucket
-      if (env.MOCK_DALLE === "true") {
-        return {
-          imageUrl: '/banner.png'
-        }
-      } else {
-        await s3
-          .putObject({
-            Bucket: env.S3_BUCKET_NAME,
-            Body: Buffer.from(base64EncodedImage!, "base64"),
-            Key: icon.id, // generate a unique key
-            ContentEncoding: "base64",
-            ContentType: "image/png",
-          })
-          .promise();
+      await s3
+            .putObject({
+              Bucket: env.S3_BUCKET_NAME,
+              Body: Buffer.from(image, "base64"),
+              Key: icon.id, // generate a unique key
+              ContentEncoding: "base64",
+              ContentType: "image/png",
+            })
+            .promise();
+            return icon;
+          }));
 
-        return {
-          imageUrl: `https://${env.S3_BUCKET_NAME}.s3.us-west-2.amazonaws.com/${icon.id}`,
-        };
-      }
+      return createIcons.map((icon) => ({
+        imageUrl: `https://${env.S3_BUCKET_NAME}.s3.amazonaws.com/${icon.id}`,
+      }));
+    }
     }),
 });
+
